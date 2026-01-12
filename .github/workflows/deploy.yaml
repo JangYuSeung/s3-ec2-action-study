@@ -1,37 +1,16 @@
-name: S3 to EC2 Deployment
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # 1. AWS 인증 (Secrets에 등록한 키 사용)
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # 2. S3로 파일 업로드 (과제 2 핵심 단계)
+# 2. S3 버킷으로 index.html 업로드
       - name: Upload to S3
         run: |
-          aws s3 cp index.html s3://${{ secrets.S3_BUCKET_NAME }}/
+          # 변수와 경로를 따옴표로 감싸서 공백 에러를 방지합니다.
+          aws s3 cp index.html "s3://${{ secrets.S3_BUCKET_NAME }}/index.html"
 
-      # 3. EC2에 접속하여 S3로부터 파일 다운로드
+      # 3. EC2에 접속해서 S3로부터 파일 다운로드
       - name: Deploy to EC2 from S3
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
+          username: ${{ secreㄹts.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # S3에서 EC2의 엔진엑스 경로로 복사
-            aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/index.html /usr/share/nginx/html/index.html
+            # EC2에서도 동일하게 S3 파일을 가져옵니다.
+            aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/index.html" /usr/share/nginx/html/index.html
