@@ -23,7 +23,7 @@ jobs:
       # 2. S3로 파일 업로드 (과제 2 핵심 단계)
       - name: Upload to S3
         run: |
-          aws s3 cp index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html
+          aws s3 cp index.html s3://${{ secrets.S3_BUCKET_NAME }}/
 
       # 3. EC2에 접속하여 S3로부터 파일 다운로드
       - name: Deploy to EC2 from S3
@@ -33,4 +33,5 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # S3에서 EC2의 엔진엑스 경로로 복사
             aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/index.html /usr/share/nginx/html/index.html
